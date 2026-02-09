@@ -81,9 +81,9 @@ POST {{host}}/auth/register
 Content-Type: application/json
 
 {
-  "email": "nuevo@dwec.com",
-  "password": "nuevo123",
-  "name": "Usuario Nuevo"
+  "email": "isaias@dwec.com",
+  "password": "isaias123",
+  "name": "Isaías"
 }
 
 ###
@@ -115,7 +115,7 @@ Content-Type: application/json
 ### AUTH - Endpoint protegido (necesita token)
 ### =============================================
 ### IMPORTANTE: Pega aqui el token del login de ADMIN
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWRtaW5AZHdlYy5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzA2Mzc5NzMsImV4cCI6MTc3MDcyNDM3M30.2yZGC6D7SVnD5-6P89UHur2hiyA6ij6mXrlq4UQACrY
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWRtaW5AZHdlYy5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzA2NTQ3MzksImV4cCI6MTc3MDc0MTEzOX0.jU8WXfvZmYmqGnFmZE7mMWU8g5X5OqakKdOpMnAYKm0
 
 ###
 
