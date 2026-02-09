@@ -1,0 +1,276 @@
+### =============================================
+### API Login + Roles - Fichero de pruebas HTTP
+### Usar con la extension "REST Client" de VS Code
+### (humao.rest-client)
+### =============================================
+### INSTRUCCIONES:
+### 1. Instala la extension "REST Client" en VS Code
+### 2. Asegurate de tener el backend corriendo (docker compose up -d)
+### 3. Pulsa "Send Request" encima de cada peticion
+### 4. Copia el token de la respuesta del login y pegalo
+###    en la variable @token de abajo
+### =============================================
+
+@host = http://localhost:3001/api
+
+
+### =============================================
+### HEALTH CHECK
+### =============================================
+
+### Verificar que el backend esta corriendo
+GET http://localhost:3001/health
+
+###
+
+### Info general de la API
+GET http://localhost:3001/
+
+
+### =============================================
+### AUTH - Endpoints publicos (no necesitan token)
+### =============================================
+
+### LOGIN como ADMIN
+### Copia el "token" de la respuesta y pegalo en @token
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@dwec.com",
+  "password": "admin123"
+}
+
+###
+
+### LOGIN como USER
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@dwec.com",
+  "password": "user123"
+}
+
+###
+
+### LOGIN con credenciales incorrectas (debe dar 401)
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@dwec.com",
+  "password": "passwordMAL"
+}
+
+###
+
+### LOGIN con email que no existe (debe dar 401)
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "noexisto@dwec.com",
+  "password": "123456"
+}
+
+###
+
+### REGISTRO de un nuevo usuario
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "nuevo@dwec.com",
+  "password": "nuevo123",
+  "name": "Usuario Nuevo"
+}
+
+###
+
+### REGISTRO con email duplicado (debe dar 409)
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin@dwec.com",
+  "password": "123456",
+  "name": "Duplicado"
+}
+
+###
+
+### REGISTRO con datos invalidos (debe dar 400)
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "no-es-un-email",
+  "password": "12",
+  "name": "A"
+}
+
+
+### =============================================
+### AUTH - Endpoint protegido (necesita token)
+### =============================================
+### IMPORTANTE: Pega aqui el token del login de ADMIN
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWRtaW5AZHdlYy5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzA2Mzc5NzMsImV4cCI6MTc3MDcyNDM3M30.2yZGC6D7SVnD5-6P89UHur2hiyA6ij6mXrlq4UQACrY
+
+###
+
+### Obtener mi perfil (con token valido)
+GET {{host}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+### Obtener mi perfil SIN token (debe dar 401)
+GET {{host}}/auth/me
+
+###
+
+### Obtener mi perfil con token inventado (debe dar 401)
+GET {{host}}/auth/me
+Authorization: Bearer token-inventado-que-no-vale
+
+
+### =============================================
+### USERS - CRUD (necesita token de ADMIN)
+### =============================================
+### IMPORTANTE: El token de arriba debe ser de un ADMIN
+### Si usas un token de USER, dara 403 Prohibido
+
+### Listar todos los usuarios
+GET {{host}}/users
+Authorization: Bearer {{token}}
+
+###
+
+### Obtener un usuario por ID
+GET {{host}}/users/1
+Authorization: Bearer {{token}}
+
+###
+
+### Obtener un usuario que no existe (debe dar 404)
+GET {{host}}/users/9999
+Authorization: Bearer {{token}}
+
+###
+
+### Crear un nuevo usuario (rol USER)
+POST {{host}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "alumno@dwec.com",
+  "password": "alumno123",
+  "name": "Alumno Nuevo",
+  "role": "USER"
+}
+
+###
+
+### Crear un nuevo usuario (rol ADMIN)
+POST {{host}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "admin2@dwec.com",
+  "password": "admin123",
+  "name": "Segundo Admin",
+  "role": "ADMIN"
+}
+
+###
+
+### Crear usuario con email duplicado (debe dar 409)
+POST {{host}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "admin@dwec.com",
+  "password": "123456",
+  "name": "Duplicado"
+}
+
+###
+
+### Actualizar un usuario (cambiar nombre y rol)
+### Cambia el :id por el ID real del usuario
+PUT {{host}}/users/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Nombre Actualizado",
+  "role": "ADMIN"
+}
+
+###
+
+### Actualizar solo el email de un usuario
+PUT {{host}}/users/2
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "emailcambiado@dwec.com"
+}
+
+###
+
+### Eliminar un usuario
+### Cambia el :id por el ID del usuario a eliminar
+### (NO uses el ID 1 si es tu admin, no podras borrarte a ti mismo)
+DELETE {{host}}/users/2
+Authorization: Bearer {{token}}
+
+###
+
+### Intentar eliminarme a mi mismo (debe dar 400)
+DELETE {{host}}/users/1
+Authorization: Bearer {{token}}
+
+
+### =============================================
+### PRUEBAS DE SEGURIDAD (para demostrar en clase)
+### =============================================
+
+### Acceder a /users SIN token (debe dar 401)
+GET {{host}}/users
+
+###
+
+### Acceder a /users con token de USER (debe dar 403)
+### Primero haz login como user@dwec.com y pega su token aqui:
+@tokenUser = PEGA_AQUI_TOKEN_DE_USER
+
+###
+
+### Listar usuarios con token de USER (debe dar 403 Prohibido)
+GET {{host}}/users
+Authorization: Bearer {{tokenUser}}
+
+###
+
+### Crear usuario con token de USER (debe dar 403 Prohibido)
+POST {{host}}/users
+Content-Type: application/json
+Authorization: Bearer {{tokenUser}}
+
+{
+  "email": "intento@dwec.com",
+  "password": "123456",
+  "name": "No deberia crearse"
+}
+
+###
+
+### Eliminar usuario con token de USER (debe dar 403 Prohibido)
+DELETE {{host}}/users/2
+Authorization: Bearer {{tokenUser}}
