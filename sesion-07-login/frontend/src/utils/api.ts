@@ -1,4 +1,4 @@
-import type { AuthResponse, MeResponse, User, UserResponse } from "../types/auth.types";
+import type { AuthResponse, MeResponse, UsersResponse } from "../types/auth.types";
 
 const API_URL = "http://localhost:3001/api";
 
@@ -52,7 +52,7 @@ export async function getMe(token: string): Promise<MeResponse> {
 }
 
 
-export async function getUsers(token:string):Promise<UserResponse> { 
+export async function getUsers(token:string):Promise<UsersResponse> {
   const response = await fetch(`${API_URL}/users`, {
     
     headers: {
