@@ -5,6 +5,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import LoginPages from "./pages/LoginPages";
 import PublicPage from "./pages/PublicPage";
 import UserDashboard from "./pages/UserDashboard";
+import UserDetail from "./pages/UserDetail";
 
 const App = () => (
   <div className="page-container">
@@ -24,6 +25,11 @@ const App = () => (
       <Route path="/admin/users" element={
         <ProtectedRoute access="admin">
           <AdminDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/users/:id" element={
+        <ProtectedRoute access="admin">
+          <UserDetail />
         </ProtectedRoute>
       } />
       <Route path="*" element={<Navigate to="/" />} />

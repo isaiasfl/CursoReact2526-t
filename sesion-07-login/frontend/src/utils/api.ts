@@ -1,4 +1,4 @@
-import type { AuthResponse, MeResponse, UsersResponse } from "../types/auth.types";
+import type { AuthResponse, CreateUserPayload, MeResponse, UserResponse, UsersResponse } from "../types/auth.types";
 
 const API_URL = "http://localhost:3001/api";
 
@@ -62,6 +62,37 @@ export async function getUsers(token:string):Promise<UsersResponse> {
 
   if (!response.ok) {
     throw new Error("Failed to fetch users");
+  }
+  return response.json();
+}
+
+// getUserById (solo admin)
+export async function getUserById(token: string, id: number): Promise<UserResponse> {
+  const response = await fetch(`${API_URL}/users/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user");
+  }
+  return response.json();
+}
+
+// createUser (solo admin)
+export async function createUser(token: string, data: CreateUserPayload): Promise<UserResponse> {
+  const response = await fetch(`${API_URL}/users`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create user");
   }
   return response.json();
 }

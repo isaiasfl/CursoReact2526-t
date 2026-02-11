@@ -1,7 +1,11 @@
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 const UserDashboard = () => {
   const { user } = useAuth();
+
+  // Si es admin, redirigir a su panel
+  if (user?.role === "ADMIN") return <Navigate to="/admin/users" />;
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
