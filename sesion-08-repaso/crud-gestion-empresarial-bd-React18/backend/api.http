@@ -1,0 +1,188 @@
+### ============================================
+### Variables
+### ============================================
+@baseUrl = http://localhost:3001
+@contentType = application/json
+# El token se captura automáticamente de la respuesta del login. 
+# IMPORTANTE: Debes ejecutar primero la petición de "Login" para que esta variable se llene.
+@token = {{login.response.body.token}}
+
+### ============================================
+### HEALTH CHECK
+### ============================================
+
+### Info del API - Muestra endpoints disponibles
+GET {{baseUrl}}/
+
+###
+
+### Health check del servidor
+GET {{baseUrl}}/health
+
+### ============================================
+### AUTH - Autenticación
+### ============================================
+
+### Registrar un nuevo usuario
+# @name register
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@empresa.com",
+  "password": "123456",
+  "name": "Admin"
+}
+
+###
+
+### Login - Iniciar sesión
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@empresa.com",
+  "password": "123456"
+}
+
+### Obtener usuario autenticado
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+### Obtener todos los usuarios
+GET {{baseUrl}}/api/auth/users
+Authorization: Bearer {{token}}
+
+### ============================================
+### COMPANIES - Empresas
+### ============================================
+
+### Obtener todas las empresas
+GET {{baseUrl}}/api/companies
+Authorization: Bearer {{token}}
+
+###
+
+### Obtener empresa por ID
+GET {{baseUrl}}/api/companies/1
+Authorization: Bearer {{token}}
+
+###
+
+### Crear una nueva empresa
+POST {{baseUrl}}/api/companies
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "TechCorp S.L.",
+  "industry": "Tecnología",
+  "website": "https://techcorp.es"
+}
+
+###
+
+### Crear otra empresa
+POST {{baseUrl}}/api/companies
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "Marketing Pro S.A.",
+  "industry": "Marketing Digital",
+  "website": "https://marketingpro.com"
+}
+
+###
+
+### Actualizar empresa (PUT)
+PUT {{baseUrl}}/api/companies/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "TechCorp Global S.L.",
+  "industry": "Tecnología e Innovación",
+  "website": "https://techcorp-global.es"
+}
+
+###
+
+### Eliminar empresa
+DELETE {{baseUrl}}/api/companies/2
+Authorization: Bearer {{token}}
+
+###
+
+### Obtener contacto de una empresa
+GET {{baseUrl}}/api/companies/1/contacts
+Authorization: Bearer {{token}}
+
+### ============================================
+### CONTACTS - Contactos
+### ============================================
+
+### Obtener todos los contactos
+GET {{baseUrl}}/api/contacts
+Authorization: Bearer {{token}}
+
+###
+
+### Obtener contacto por ID
+GET {{baseUrl}}/api/contacts/1
+Authorization: Bearer {{token}}
+
+###
+
+### Crear un nuevo contacto
+POST {{baseUrl}}/api/contacts
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "firstName": "Carlos",
+  "lastName": "García",
+  "email": "carlos.garcia@techcorp.es",
+  "phone": "+34 612 345 678",
+  "position": "Director de Tecnología",
+  "companyId": 1,
+  "linkedin": "https://linkedin.com/in/carlosgarcia",
+  "notes": "Contacto principal para proyectos de desarrollo"
+}
+
+###
+
+### Crear otro contacto (sin empresa)
+POST {{baseUrl}}/api/contacts
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "firstName": "María",
+  "lastName": "López",
+  "email": "maria.lopez@gmail.com",
+  "phone": "+34 699 876 543",
+  "position": "Freelance Designer"
+}
+
+###
+
+### Actualizar contacto
+PUT {{baseUrl}}/api/contacts/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "position": "CTO",
+  "phone": "+34 612 000 111",
+  "notes": "Ascendido a CTO en enero 2026"
+}
+
+###
+
+### Eliminar contacto
+DELETE {{baseUrl}}/api/contacts/2
+Authorization: Bearer {{token}}

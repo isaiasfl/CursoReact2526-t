@@ -1,0 +1,109 @@
+version: "3.9"
+
+services:
+  # ========================================
+  # PostgreSQL Database
+  # ========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: crud_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
+      POSTGRES_DB: ${POSTGRES_DB:-contacts_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - crud_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-contacts_db}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================
+  # pgAdmin - Administrador visual de PostgreSQL
+  # ========================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: crud_pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - crud_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ========================================
+  # Backend API (Node.js + Express + TypeScript)
+  # ========================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crud_backend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin123}@postgres:5432/${POSTGRES_DB:-contacts_db}
+
+      # Server
+      PORT: ${PORT:-3000}
+      NODE_ENV: ${NODE_ENV:-development}
+
+      # Authentication
+      AUTH_REQUIRED: ${AUTH_REQUIRED:-false}
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+    volumes:
+      # Montar código fuente para hot reload en desarrollo
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+    networks:
+      - crud_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Comando personalizado: espera a la DB, ejecuta migraciones y seed, luego inicia el servidor
+    command: >
+      sh -c "
+        echo '⏳ Esperando a PostgreSQL...' &&
+        npx prisma migrate deploy &&
+        echo '✅ Migraciones aplicadas' &&
+        npm run prisma:seed &&
+        npm run dev
+      "
+
+# ========================================
+# Volúmenes persistentes
+# ========================================
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+# ========================================
+# Red interna para comunicación entre servicios
+# ========================================
+networks:
+  crud_network:
+    driver: bridge

@@ -1,0 +1,58 @@
+// Configuración del generador de cliente Prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuración de la conexión a la base de datos PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuario para autenticación JWT
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// Modelo de Empresa
+model Company {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  industry  String?
+  website   String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relación: Una empresa puede tener muchos contactos
+  contacts  Contact[]
+
+  @@map("companies")
+}
+
+// Modelo de Contacto
+model Contact {
+  id        Int      @id @default(autoincrement())
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String   @unique
+  phone     String?
+  position  String?
+  companyId Int?     @map("company_id")
+  linkedin  String?
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relación: Un contacto puede pertenecer a una empresa (opcional)
+  // Si se elimina la empresa, el company_id se establece en NULL
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@map("contacts")
+}
